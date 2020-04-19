@@ -4,6 +4,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <math.h>
+
+/* Macro Constants */
+#define PATH_LENGTH 128
 
 int main(int argc, char* argv[])
 {
@@ -49,5 +53,6 @@ int main(int argc, char* argv[])
 	      }
 	}
 	create_fd(&fd_input, &fd_input_2, input_file_path, input_file_path_2);
-    
+    int matrix[(int)pow(2.0, (double)n * 2)];
+	handle_matrix(fd_input, matrix, n);
 }

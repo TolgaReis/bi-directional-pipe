@@ -1,1 +1,0 @@
-#define PATH_LENGTH 128
