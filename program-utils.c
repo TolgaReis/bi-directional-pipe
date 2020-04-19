@@ -21,7 +21,7 @@ void matrix_mult(const int n, const int first_matrix[], const int second_matrix[
     
 }
 
-void create_fd(int* fd_input, int* fd_input_2, char* input_path, char* input_path_2)
+void create_fd(int* fd_input, int* fd_input_2, const char* input_path, const char* input_path_2)
 {
     *fd_input = open(input_path, O_RDONLY);
 	if(*fd_input == -1)
@@ -36,4 +36,9 @@ void create_fd(int* fd_input, int* fd_input_2, char* input_path, char* input_pat
         perror("inputPathB: ");
 		exit(EXIT_FAILURE);
 	}
+}
+
+void handle_matrix(const int fd, int* matrix)
+{
+    
 }

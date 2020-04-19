@@ -5,6 +5,8 @@
 /* calculates the product of two square matrices and returns the result matrix */
 void matrix_mult(const int, const int*, const int*, int*);
 /* gets file descriptors according to given paths */
-void create_fd(int*, int*, char*, char*);
+void create_fd(int*, int*, const char*, const char*);
+/* reads the file with given file descriptor and converts it to square matrix */
+void handle_matrix(const int, int*);
 
 #endif

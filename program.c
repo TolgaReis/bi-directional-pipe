@@ -12,9 +12,10 @@ int main(int argc, char* argv[])
     int fd_input;
     /* file descriptor for file that is path name of given by -j option */
     int fd_input_2;
-    
+
     char input_file_path[PATH_LENGTH];
     char input_file_path_2[PATH_LENGTH];
+	int n;
 
     int option;
 
@@ -25,7 +26,7 @@ int main(int argc, char* argv[])
 		exit(EXIT_FAILURE);
 	}
 
-	while ((option = getopt (argc, argv, "ij")) != -1)
+	while ((option = getopt (argc, argv, "ijn")) != -1)
   	{
 	    switch (option)
 	      {
@@ -35,6 +36,13 @@ int main(int argc, char* argv[])
 	      case 'j':
 	        strcpy(input_file_path_2, argv[optind]);
 	        break;
+		  case 'n':
+			if((n = atoi(argv[optind])) <= 0)
+			{
+				fprintf(stderr, "Please enter a positive integer value for -n option!\n");
+				exit(EXIT_FAILURE);
+			}
+			break;
 	      default:
 		  	fprintf(stderr, "Wrong input option usage! Use: ./program -i inputPathA -j inputPathB -n 8\n");
 			exit(1);
