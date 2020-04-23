@@ -17,8 +17,11 @@ void create_quarters(char*, char*, char*, char*, const int*, const int*, const i
 /* sends two quarters to child process to calculates matrix multiplication */
 void send_to_child(int, char*, char*);
 /* sends multiplicaiton result from child to parent process*/
-void sent_to_parent(int, char*);
+void send_to_parent(int, char*);
 /* reads pipe when sending data from child to parent or parent to child process*/
-void read_pipe(int, int, int, int**);
-
+void read_pipe(int, const int, const int, int**);
+/* prints the matrix when it was created as 2D array */
+void print_2d_matrix(int**,const int);
+/* prints the matrix when it was created as 1D array*/
+void print_1d_matrix(const int*, const int, const int);
 #endif

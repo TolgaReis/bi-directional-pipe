@@ -42,10 +42,9 @@ void create_fd(int* fd_input, int* fd_input_2, const char* input_path, const cha
 	}
 }
 
-void handle_matrix(const int fd, int* matrix, const int n)
+void handle_matrix(const int fd, int* matrix, const int size)
 {
     int read_bytes = 0;
-    int size = (int)pow(2.0, n * 2);
     char char_matrix[size];
     if(!((read_bytes = read(fd, char_matrix, sizeof(char_matrix))) == -1) && (errno == EINTR))
     {
@@ -57,7 +56,6 @@ void handle_matrix(const int fd, int* matrix, const int n)
         fprintf(stderr, "There are not sufficient characters in the file!\n");
         exit(EXIT_FAILURE);
     }
-    char_matrix[size] = '\0';
     char_to_int(char_matrix, matrix, size);
     close(fd);
 }
@@ -74,40 +72,40 @@ void create_quarters(char* matrix_a_1, char* matrix_a_2, char* matrix_b_1, char*
                      const int* matrix_a, const int* matrix_b, const int n)
 {
     int size = BLOCK_SIZE;
-    char buf[32];
+    char buffer[32];
     for(int i = 0; i < n/2; i++)
     {
-        sprintf(buf, "%d,", matrix_a[i]);
-        if(strlen(matrix_a_1) + strlen(buf) >= size)
+        sprintf(buffer, "%d,", matrix_a[i]);
+        if(strlen(matrix_a_1) + strlen(buffer) >= size)
         {
             size *= 2;
-            matrix_a_1 = (char *) realloc(matrix_a_1, size);
+            matrix_a_1 = (char *)realloc(matrix_a_1, size);
         }
-        strcat(matrix_a_1, buf);
+        strcat(matrix_a_1, buffer);
     }
     
     size = BLOCK_SIZE;
     for(int i = n / 2; i < n; i++)
     {
-        sprintf(buf, "%d,", matrix_a[i]);
-        if(strlen(matrix_a_2) + strlen(buf) >= size)
+        sprintf(buffer, "%d,", matrix_a[i]);
+        if(strlen(matrix_a_2) + strlen(buffer) >= size)
         {
             size *= 2;
-            matrix_a_2 = (char *) realloc(matrix_a_2, size);
+            matrix_a_2 = (char *)realloc(matrix_a_2, size);
         }
-        strcat(matrix_a_2, buf);
+        strcat(matrix_a_2, buffer);
     }
 
     size = BLOCK_SIZE;
     for(int i = 0; i < n; i++)
     {
-        sprintf(buf, "%d,", matrix_b[i]);
-        if(strlen(matrix_b_1) + strlen(buf) >= size)
+        sprintf(buffer, "%d,", matrix_b[i]);
+        if(strlen(matrix_b_1) + strlen(buffer) >= size)
         {
             size *= 2;
-            matrix_b_1 = (char *) realloc(matrix_b_1, size);
+            matrix_b_1 = (char *)realloc(matrix_b_1, size);
         }
-        strcat(matrix_b_1, buf);
+        strcat(matrix_b_1, buffer);
         if((i+1) % ((int)sqrt(n) / 2) == 0)
                 i += ((int)sqrt(n) / 2);
     }
@@ -115,13 +113,13 @@ void create_quarters(char* matrix_a_1, char* matrix_a_2, char* matrix_b_1, char*
     size = BLOCK_SIZE;
     for(int i = ((int)sqrt(n) / 2); i < n; i++)
     {
-        sprintf(buf, "%d,", matrix_b[i]);
-        if(strlen(matrix_b_2) + strlen(buf) >= size)
+        sprintf(buffer, "%d,", matrix_b[i]);
+        if(strlen(matrix_b_2) + strlen(buffer) >= size)
         {
             size *= 2;
-            matrix_b_2 = (char *) realloc(matrix_b_2, size);
+            matrix_b_2 = (char *)realloc(matrix_b_2, size);
         }
-        strcat(matrix_b_2, buf);
+        strcat(matrix_b_2, buffer);
         if((i+1) % ((int)sqrt(n) / 2) == 0)
                 i += ((int)sqrt(n) / 2);
     }
@@ -129,53 +127,53 @@ void create_quarters(char* matrix_a_1, char* matrix_a_2, char* matrix_b_1, char*
 
 void send_to_child(int fd, char* matrix_a, char* matrix_b)
 {
-    int bytes = strlen(matrix_a);
+    int total_bytes = strlen(matrix_a);
     int written_bytes = 0;
-    char* bp = matrix_a;
-    while(bytes > 0)
+    char* buffer_matrix = matrix_a;
+    
+    while(total_bytes > 0)
     {
-        while(((written_bytes = write(fd, bp, bytes)) == -1 ) && (errno == EINTR));
+        while(((written_bytes = write(fd, buffer_matrix, total_bytes)) == -1 ) && (errno == EINTR));
         if (written_bytes < 0)
             break;
-        bytes -= written_bytes;
-        bp += written_bytes;
+        total_bytes -= written_bytes;
+        buffer_matrix += written_bytes;
     }
-
-    bytes = strlen(matrix_b);
+    
+    total_bytes = strlen(matrix_b);
     written_bytes = 0;
-    bp = matrix_b;
+    buffer_matrix = matrix_b;
 
-    while(bytes > 0)
+    while(total_bytes > 0)
     {
-        while(((written_bytes = write(fd, bp, bytes)) == -1 ) && (errno == EINTR));
+        while(((written_bytes = write(fd, buffer_matrix, total_bytes)) == -1 ) && (errno == EINTR));
         if (written_bytes < 0)
             break;
-        bytes -= written_bytes;
-        bp += written_bytes;
+        total_bytes -= written_bytes;
+        buffer_matrix += written_bytes;
     }
 }
 
 void send_to_parent(int fd, char* matrix)
 {
-	int bytes = strlen(matrix);
+	int total_bytes = strlen(matrix);
 	int written_bytes = 0;
-	char* bp = matrix;
-	while(bytes > 0)
+	char* buffer_matrix = matrix;
+	while(total_bytes > 0)
 	{
-		while(((written_bytes = write(fd, bp, bytes)) == -1 ) && (errno == EINTR));
+		while(((written_bytes = write(fd, buffer_matrix, total_bytes)) == -1 ) && (errno == EINTR));
 		if (written_bytes < 0)
 			break;
-		bytes -= written_bytes;
-		bp += written_bytes;
+		total_bytes -= written_bytes;
+		buffer_matrix += written_bytes;
 	}
-
 }
 
-void read_pipe(int fd, int number2, int quart, int** matrix)
+void read_pipe(int fd, const int side, const int quarter, int** matrix)
 {
 	char buffer[BLOCK_SIZE] = "";
-	int size = number2*number2/4;
-	int A[size];
+	int size = ((int)pow(side, 2))/4;
+	int matrix_read[size];
 	int bytesRead = 1;
 	int count = 0;
 	char ch;
@@ -186,61 +184,83 @@ void read_pipe(int fd, int number2, int quart, int** matrix)
 			strncat(buffer, &ch, 1);
 		else
 		{
-			A[count] = atoi(buffer);
+			matrix_read[count] = atoi(buffer);
 			strcpy(buffer,"");
 			count++;
 		}
 	}
 
-	int i, j, x = 0;
+	int index = 0;
 
-	if(quart == 2)
-	{
-		for(i = 0; i < number2/2; i++)
+    switch (quarter)
+    {
+    case 1:
+        for(int i = 0; i < side / 2; i++)
 		{
-			for(j = 0; j < number2/2; j++)
+			for(int j = 0; j < side / 2; j++)
 			{
-				matrix[i][j] = A[x];
-				x++;
+				matrix[i][j] = matrix_read[index];
+				++index;
 			}
 		}
-	}
-	else if(quart == 3)
-	{
-		for(i = 0; i < number2/2; i++)
+        break;
+    case 2:
+        for(int i = 0; i < side / 2; i++)
 		{
-			for(j = number2/2; j < number2; j++)
+			for(int j = side / 2; j < side; j++)
 			{
-				matrix[i][j] = A[x];
-				x++;
+				matrix[i][j] = matrix_read[index];
+				++index;
 			}
 		}
-	}
-	else if(quart == 4)
-	{
-		for(i = number2/2; i < number2; i++)
+        break;
+    case 3:
+        for(int i = side / 2; i < side; i++)
 		{
-			for(j = 0; j < number2/2; j++)
+			for(int j = 0; j < side / 2; j++)
 			{
-				matrix[i][j] = A[x];
-				x++;
+				matrix[i][j] = matrix_read[index];
+				++index;
 			}
 		}
-	}
-	else if(quart == 5)
-	{
-		for(i = number2/2; i < number2; i++)
+        break;
+    case 4:
+        for(int i = side / 2; i < side; i++)
 		{
-			for(j = number2/2; j < number2; j++)
+			for(int j = side / 2; j < side; j++)
 			{
-				matrix[i][j] = A[x];
-				x++;
+				matrix[i][j] = matrix_read[index];
+				++index;
 			}
 		}
-	}
-	else
+        break;
+    default:
+        fprintf(stderr, "Read pipe: Wrong quarter!\n");
+		exit(EXIT_FAILURE);
+        break;
+    }
+}
+
+void print_2d_matrix(int** matrix,const int side)
+{
+	for(int i = 0; i < side; i++)
 	{
-		perror("wrong quart in reader");
-		exit(1);
+		printf("\n");
+		for(int j = 0; j < side; j++)
+		{
+			printf("%-3d ", matrix[i][j]);
+		}
 	}
+	printf("\n");
+}
+
+void print_1d_matrix(const int* matrix, const int size, const int side)
+{
+    for(int i = 0; i < size; i++)
+    {
+        if (i % side == 0)
+            printf("\n");
+        printf("%-3d ", matrix[i]);
+    }
+
 }
